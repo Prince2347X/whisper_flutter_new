@@ -70,6 +70,29 @@ enum WhisperModel {
   String getPath(String dir) {
     return "$dir/ggml-$modelName.bin";
   }
+
+  /// Parse a model name or filename into a `WhisperModel`.
+  ///
+  /// Accepts values like `tiny`, `ggml-tiny.bin`, or
+  /// `path/to/ggml-tiny.en.bin` and returns the matching enum value.
+  /// If no known model matches the provided name the method returns
+  /// `WhisperModel.none`.
+  static WhisperModel fromString(String name) {
+    if (name.isEmpty) return WhisperModel.none;
+
+    // Accept a full path or filename. Keep only the basename.
+    var n = name.split('/').last;
+
+    // Strip optional prefix/suffix used in filenames.
+    if (n.startsWith('ggml-')) n = n.substring(5);
+    if (n.endsWith('.bin')) n = n.substring(0, n.length - 4);
+
+    for (var v in WhisperModel.values) {
+      if (v.modelName == n) return v;
+    }
+
+    return WhisperModel.none;
+  }
 }
 
 /// Download [model] to [destinationPath]
