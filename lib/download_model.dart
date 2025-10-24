@@ -17,19 +17,49 @@ enum WhisperModel {
 
   /// tiny model for all languages
   tiny("tiny"),
+  /// quantized variants of tiny
+  tinyQ5_1("tiny-q5_1"),
+  tinyQ8_0("tiny-q8_0"),
+  /// English-only tiny
+  tinyEn("tiny.en"),
+  tinyEnQ5_1("tiny.en-q5_1"),
+  tinyEnQ8_0("tiny.en-q8_0"),
 
   /// base model for all languages
   base("base"),
+  baseQ5_1("base-q5_1"),
+  baseQ8_0("base-q8_0"),
+  baseEn("base.en"),
+  baseEnQ5_1("base.en-q5_1"),
+  baseEnQ8_0("base.en-q8_0"),
 
-  /// small model for all languages
+  /// small model variants
   small("small"),
+  smallQ5_1("small-q5_1"),
+  smallQ8_0("small-q8_0"),
+  smallEn("small.en"),
+  smallEnQ5_1("small.en-q5_1"),
+  smallEnQ8_0("small.en-q8_0"),
+  smallEnTdrz("small.en-tdrz"),
 
-  /// medium model for all languages
+  /// medium model variants
   medium("medium"),
+  mediumQ5_0("medium-q5_0"),
+  mediumQ8_0("medium-q8_0"),
+  mediumEn("medium.en"),
+  mediumEnQ5_0("medium.en-q5_0"),
+  mediumEnQ8_0("medium.en-q8_0"),
 
-  /// large model for all languages
+  /// large model variants
   largeV1("large-v1"),
-  largeV2("large-v2");
+  largeV2("large-v2"),
+  largeV2Q5_0("large-v2-q5_0"),
+  largeV2Q8_0("large-v2-q8_0"),
+  largeV3("large-v3"),
+  largeV3Q5_0("large-v3-q5_0"),
+  largeV3Turbo("large-v3-turbo"),
+  largeV3TurboQ5_0("large-v3-turbo-q5_0"),
+  largeV3TurboQ8_0("large-v3-turbo-q8_0");
 
   const WhisperModel(this.modelName);
 
@@ -39,6 +69,29 @@ enum WhisperModel {
   /// Get local path of model file
   String getPath(String dir) {
     return "$dir/ggml-$modelName.bin";
+  }
+
+  /// Parse a model name or filename into a `WhisperModel`.
+  ///
+  /// Accepts values like `tiny`, `ggml-tiny.bin`, or
+  /// `path/to/ggml-tiny.en.bin` and returns the matching enum value.
+  /// If no known model matches the provided name the method returns
+  /// `WhisperModel.none`.
+  static WhisperModel fromString(String name) {
+    if (name.isEmpty) return WhisperModel.none;
+
+    // Accept a full path or filename. Keep only the basename.
+    var n = name.split('/').last;
+
+    // Strip optional prefix/suffix used in filenames.
+    if (n.startsWith('ggml-')) n = n.substring(5);
+    if (n.endsWith('.bin')) n = n.substring(0, n.length - 4);
+
+    for (var v in WhisperModel.values) {
+      if (v.modelName == n) return v;
+    }
+
+    return WhisperModel.none;
   }
 }
 
